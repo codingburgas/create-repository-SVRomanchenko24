@@ -14,7 +14,7 @@ class mainWindow : public Gtk::Window
 		// main menu window
 		Gtk::ListView quizList;
 		Gtk::Button startQuiz;
-		Gtk::Box box;
+		Gtk::Box mainMenuBox;
 		Gtk::ScrolledWindow listScroll;
 		Glib::RefPtr<Gtk::SingleSelection> selectionModel;
 		Glib::RefPtr<Gtk::StringList> quizStrings;

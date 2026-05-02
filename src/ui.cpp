@@ -2,8 +2,11 @@
 #include "../include/quiz.h"
 #include "../include/utils.h"
 #include <cstdint>
-#include <iostream>
 #include <string>
+
+#define MARGIN 10
+#define WIDTH 250
+#define HEIGHT 300
 
 void mainWindow::onItemSetup(const Glib::RefPtr<Gtk::ListItem>& listItem)
 {
@@ -23,6 +26,7 @@ void mainWindow::initQuiz()
 	current = 0;
 	correct = 0;
 	total = getTotalQuestions(id);
+	set_title(quizStrings->get_string(id));
 	updateContents();
 
 	set_child(textButtonSplit);
@@ -31,14 +35,14 @@ void mainWindow::initQuiz()
 void mainWindow::showMainMenu()
 {
 	id = 0;
-	set_child(box);
+	set_title("Main Menu");
+	set_child(mainMenuBox);
 }
 
 void mainWindow::updateContents()
 {
 	if (total==current)
 	{
-		std::cout << correct;
 		showMainMenu(); // TODO show result screen
 		return;
 	}
@@ -87,15 +91,20 @@ void mainWindow::handleButton4()
 	handleInput(3);
 }
 
-mainWindow::mainWindow() : startQuiz("Start quiz"), box(Gtk::Orientation::VERTICAL)
+mainWindow::mainWindow() : startQuiz("Start quiz"), mainMenuBox(Gtk::Orientation::VERTICAL, 5), textButtonSplit(Gtk::Orientation::VERTICAL, 5)
 {
 	// MAIN WINDOW
 
 	// layout
 	listScroll.set_child(quizList);
-	box.append(listScroll);
-	box.append(startQuiz);
-	set_child(box);
+	listScroll.set_margin(MARGIN);
+	listScroll.set_expand();
+
+	mainMenuBox.append(listScroll);
+	mainMenuBox.append(startQuiz);
+	startQuiz.set_expand();
+	startQuiz.set_margin(MARGIN);
+	set_child(mainMenuBox);
 
 	startQuiz.signal_clicked().connect(sigc::mem_fun(*this, &mainWindow::initQuiz));
 
@@ -113,20 +122,21 @@ mainWindow::mainWindow() : startQuiz("Start quiz"), box(Gtk::Orientation::VERTIC
 
 	// content
 	set_title("Main Menu");
+	set_default_size(WIDTH, HEIGHT);
 
 	// QUIZ WINDOW
 	
 	// layout
-	textButtonSplit = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
 	textButtonSplit.append(progress);
-	progress.set_margin(15);
+	progress.set_margin(MARGIN);
 	textButtonSplit.append(question);
-	question.set_margin(15);
+	question.set_margin(MARGIN);
 	textButtonSplit.append(buttonGrid);
 	for (int i = 0; i<4; ++i)
 	{
 		buttonGrid.attach(options[i], i/2, i%2);
-		options[i].set_margin(15);
+		options[i].set_expand();
+		options[i].set_margin(MARGIN);
 	}
 
 	set_resizable(false);
@@ -136,8 +146,6 @@ mainWindow::mainWindow() : startQuiz("Start quiz"), box(Gtk::Orientation::VERTIC
 	options[1].signal_clicked().connect(sigc::mem_fun(*this, &mainWindow::handleButton2));
 	options[2].signal_clicked().connect(sigc::mem_fun(*this, &mainWindow::handleButton3));
 	options[3].signal_clicked().connect(sigc::mem_fun(*this, &mainWindow::handleButton4));
-
-	// quiz parameter setup
 }
 
 mainWindow::~mainWindow()
