@@ -5,12 +5,41 @@
 #include <iostream>
 #include <string>
 
-void quizWindow::updateContents()
+void mainWindow::onItemSetup(const Glib::RefPtr<Gtk::ListItem>& listItem)
+{
+	listItem->set_child(*Gtk::make_managed<Gtk::Label>(""));
+}
+
+void mainWindow::onItemBind(const Glib::RefPtr<Gtk::ListItem>& listItem)
+{
+	auto position = listItem->get_position();
+	if (position==GTK_INVALID_LIST_POSITION) return;
+	((Gtk::Label*)listItem->get_child())->set_label(quizStrings->get_string(position));
+}
+
+void mainWindow::initQuiz()
+{
+	id = selectionModel->get_selected();
+	current = 0;
+	correct = 0;
+	total = getTotalQuestions(id);
+	updateContents();
+
+	set_child(textButtonSplit);
+}
+
+void mainWindow::showMainMenu()
+{
+	id = 0;
+	set_child(box);
+}
+
+void mainWindow::updateContents()
 {
 	if (total==current)
 	{
 		std::cout << correct;
-		close();
+		showMainMenu(); // TODO show result screen
 		return;
 	}
 	
@@ -29,41 +58,66 @@ void quizWindow::updateContents()
 		options[i].set_label(optionsText[i]);
 		delete optionsText[i];
 	}
-
 }
 
-void quizWindow::handleInput(uint8_t button)
+void mainWindow::handleInput(uint8_t button)
 {
 	++current;
 	if (button==correctOption) ++correct;
 	updateContents();
 }
 
-void quizWindow::handleButton1()
+void mainWindow::handleButton1()
 {
 	handleInput(0);
 }
 
-void quizWindow::handleButton2()
+void mainWindow::handleButton2()
 {
 	handleInput(1);
 }
 
-void quizWindow::handleButton3()
+void mainWindow::handleButton3()
 {
 	handleInput(2);
 }
 
-void quizWindow::handleButton4()
+void mainWindow::handleButton4()
 {
 	handleInput(3);
 }
 
-quizWindow::quizWindow()
+mainWindow::mainWindow() : startQuiz("Start quiz"), box(Gtk::Orientation::VERTICAL)
 {
+	// MAIN WINDOW
+
+	// layout
+	listScroll.set_child(quizList);
+	box.append(listScroll);
+	box.append(startQuiz);
+	set_child(box);
+
+	startQuiz.signal_clicked().connect(sigc::mem_fun(*this, &mainWindow::initQuiz));
+
+	// list
+	
+	quizStrings = Gtk::StringList::create(getQuizNameList());
+	selectionModel = Gtk::SingleSelection::create(quizStrings);
+	selectionModel->set_autoselect(true);
+	quizList.set_model(selectionModel);
+	
+	auto factory = Gtk::SignalListItemFactory::create();
+	factory->signal_setup().connect(sigc::mem_fun(*this, &mainWindow::onItemSetup));
+	factory->signal_bind().connect(sigc::mem_fun(*this, &mainWindow::onItemBind));	
+	quizList.set_factory(factory);
+
+	// content
+	set_title("Main Menu");
+
+	// QUIZ WINDOW
+	
 	// layout
 	textButtonSplit = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-	set_child(textButtonSplit);
 	textButtonSplit.append(progress);
 	progress.set_margin(15);
 	textButtonSplit.append(question);
@@ -78,21 +132,15 @@ quizWindow::quizWindow()
 	set_resizable(false);
 
 	// click handlers
-	options[0].signal_clicked().connect(sigc::mem_fun(*this, &quizWindow::handleButton1));
-	options[1].signal_clicked().connect(sigc::mem_fun(*this, &quizWindow::handleButton2));
-	options[2].signal_clicked().connect(sigc::mem_fun(*this, &quizWindow::handleButton3));
-	options[3].signal_clicked().connect(sigc::mem_fun(*this, &quizWindow::handleButton4));
+	options[0].signal_clicked().connect(sigc::mem_fun(*this, &mainWindow::handleButton1));
+	options[1].signal_clicked().connect(sigc::mem_fun(*this, &mainWindow::handleButton2));
+	options[2].signal_clicked().connect(sigc::mem_fun(*this, &mainWindow::handleButton3));
+	options[3].signal_clicked().connect(sigc::mem_fun(*this, &mainWindow::handleButton4));
 
 	// quiz parameter setup
-	id = getQuizId();
-	current = 0;
-	correct = 0;
-	set_title(getQuizName(id));
-	total = getTotalQuestions(id);
-	updateContents();
 }
 
-quizWindow::~quizWindow()
+mainWindow::~mainWindow()
 {
 	cleanUpQuizData();
 }
