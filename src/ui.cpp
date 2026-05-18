@@ -7,7 +7,7 @@
 #include <iostream>
 
 #define MARGIN 10
-#define WIDTH 250
+#define WIDTH 600
 #define HEIGHT 300
 
 void mainWindow::onItemSetup(const Glib::RefPtr<Gtk::ListItem>& listItem)
@@ -300,7 +300,7 @@ mainWindow::mainWindow() : resultButton("View results"), startQuiz("Start quiz")
 	answerBackButton.set_expand();
 	answerListBackBox.append(answerBackButton);
 
-	// list
+	// lists
 
 	questionStrings = Gtk::StringList::create({});
 	questionSelectionModel = Gtk::NoSelection::create(questionStrings);
@@ -320,7 +320,9 @@ mainWindow::mainWindow() : resultButton("View results"), startQuiz("Start quiz")
 	answerFactory->signal_bind().connect(sigc::mem_fun(*this, &mainWindow::onAnswerItemBind));
 	answerList.set_factory(answerFactory);
 
+	questionList.set_expand();
 	questionAnswerBox.append(questionList);
+	answerList.set_expand();
 	questionAnswerBox.append(answerList);
 
 	questionAnswerScrolledWindow.set_child(questionAnswerBox);
