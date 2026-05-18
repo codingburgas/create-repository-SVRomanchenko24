@@ -3,6 +3,6 @@
 
 #include <string>
 
-std::string getProgressString(int current, int total);
+string getProgressString(int current, int total);
 
 #endif
