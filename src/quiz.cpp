@@ -15,12 +15,11 @@ static string toLowercase(string text)
 	return text;
 }
 
-vector<int> searchQuizQuestions(int quizId, const char *text)
+bool searchQuizQuestions(int quizId, const char *text)
 {
-	vector<int> matchingQuestions;
 	if (text==nullptr)
 	{
-		return matchingQuestions;
+		return 0;
 	}
 
 	string searchText = toLowercase(text);
@@ -30,14 +29,13 @@ vector<int> searchQuizQuestions(int quizId, const char *text)
 	{
 		string questionText = toLowercase(testQuestionName(quizId, questionId));
 
-		if ((questionText.find(searchText)!=string::npos)||(quizText.find(searchText)!=string::npos))
+		if ((questionText.find(searchText)!=string::npos)||(quizText.find(searchText)!=string::npos)||*text==0)
 		{
-			matchingQuestions.push_back(questionId);
-			continue;
+			return 1;
 		}
 	}
 
-	return matchingQuestions;
+	return 0;
 }
 
 vector<int> testProgressUncompleted()

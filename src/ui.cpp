@@ -133,9 +133,9 @@ void mainWindow::updateMainMenuSearch()
 	availableQuizes.clear();
 	for (size_t i = 0; i<uncompletedTests.size(); ++i)
 	{
-		if (searchQuizQuestions(uncompletedTests[i], quizSearchBuffer->get_text().c_str()).size()) // TEMP
+		if (searchQuizQuestions(uncompletedTests[i], quizSearchBuffer->get_text().c_str()))
 		{
-			availableQuizes.push_back(i);
+			availableQuizes.push_back(uncompletedTests[i]);
 			quizStrings->append(testName(uncompletedTests[i]));
 		}
 	}
@@ -150,7 +150,7 @@ void mainWindow::updateResultMenuSearch()
 	{
 		if (find(uncompletedTests.begin(), uncompletedTests.end(), i)==uncompletedTests.end())
 		{
-			if (searchQuizQuestions(i, resultSearchBuffer->get_text().c_str()).size())
+			if (searchQuizQuestions(i, resultSearchBuffer->get_text().c_str()))
 			{
 				availableQuizes.push_back(i);
 				resultStrings->append(testName(i));
